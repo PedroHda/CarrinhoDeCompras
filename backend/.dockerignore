@@ -1,0 +1,5 @@
+# Compilações, testes e configurações locais não entram no contexto Docker.
+**/bin
+**/obj
+Carrinho.Api.Tests
+**/appsettings.Local.json

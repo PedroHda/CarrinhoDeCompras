@@ -1,0 +1,48 @@
+name: carrinho_de_compras
+description: "Listas de supermercado com SQLite privado, histórico e importação de NFC-e."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  # Seleção de backups JSON pelo seletor nativo do Android.
+  file_picker: ^13.1.0
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  google_mlkit_text_recognition: ^0.17.1
+  html: ^0.15.7
+  http: ^1.6.0
+  image_picker: ^1.2.4
+  intl: ^0.20.3
+  mobile_scanner: ^7.4.2
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  share_plus: ^13.3.1
+  sqflite: ^2.4.4+2
+  url_launcher: ^6.3.3
+  uuid: ^4.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  sqflite_common_ffi: ^2.4.4
+
+flutter:
+  uses-material-design: true
+  # Família distribuída com licença Apache 2.0 em assets/fonts/roboto_license.txt.
+  fonts:
+    - family: AppRoboto
+      fonts:
+        - asset: assets/fonts/roboto-regular.ttf
+          weight: 400
+        - asset: assets/fonts/roboto-medium.ttf
+          weight: 500
+        - asset: assets/fonts/roboto-bold.ttf
+          weight: 700
+        - asset: assets/fonts/roboto-black.ttf
+          weight: 900
