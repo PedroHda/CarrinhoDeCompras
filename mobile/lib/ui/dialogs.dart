@@ -3,6 +3,8 @@ import 'package:uuid/uuid.dart';
 
 import '../core/formatters.dart';
 import '../domain/models.dart';
+import '../domain/list_input.dart';
+import 'theme.dart';
 
 /// Solicita um nome validado e libera o controlador depois de fechar o diálogo.
 Future<String?> askName(
@@ -93,6 +95,187 @@ class ProductEdit {
   final int totalCents;
 }
 
+enum ListCreation { manual, bulk, previousMonth }
+
+Future<ListCreation?> chooseListCreation(BuildContext context) =>
+    showModalBottomSheet<ListCreation>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (context) => SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+                child: Text(
+                  'Como vamos começar?',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              for (final option in [
+                (
+                  ListCreation.manual,
+                  Icons.add_shopping_cart_rounded,
+                  'Item a item',
+                  'Escolha produtos e quantidades no seu ritmo.',
+                ),
+                (
+                  ListCreation.bulk,
+                  Icons.playlist_add_rounded,
+                  'Vários de uma vez',
+                  'Digite ou cole um produto por linha.',
+                ),
+                (
+                  ListCreation.previousMonth,
+                  Icons.auto_awesome_rounded,
+                  'Repetir mês anterior',
+                  'Todos os produtos comprados, com as quantidades.',
+                ),
+              ])
+                Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    leading: CircleAvatar(
+                      backgroundColor: AppColors.lavender,
+                      foregroundColor: AppColors.primary,
+                      child: Icon(option.$2),
+                    ),
+                    title: Text(
+                      option.$3,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    subtitle: Text(option.$4),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.pop(context, option.$1),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+/// Um produto por linha; a prévia usa a mesma interpretação da gravação.
+Future<List<ShoppingItem>?> askBulkProducts(BuildContext context) =>
+    showModalBottomSheet<List<ShoppingItem>>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) => const _BulkProductsSheet(),
+    );
+
+class _BulkProductsSheet extends StatefulWidget {
+  const _BulkProductsSheet();
+  @override
+  State<_BulkProductsSheet> createState() => _BulkProductsSheetState();
+}
+
+class _BulkProductsSheetState extends State<_BulkProductsSheet> {
+  final _controller = TextEditingController();
+  List<ShoppingItem> _items = [];
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _preview(String input) {
+    setState(() {
+      try {
+        _items = parseShoppingItems(input);
+        _error = null;
+      } on FormatException catch (error) {
+        _items = [];
+        _error = error.message;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(
+      24,
+      0,
+      24,
+      24 + MediaQuery.viewInsetsOf(context).bottom,
+    ),
+    child: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Vários de uma vez',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Um produto por linha. Sem quantidade, adicionamos 1 unidade.',
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            key: const Key('bulk-input'),
+            controller: _controller,
+            autofocus: true,
+            minLines: 5,
+            maxLines: 8,
+            maxLength: 30000,
+            textCapitalization: TextCapitalization.sentences,
+            keyboardType: TextInputType.multiline,
+            onChanged: _preview,
+            decoration: InputDecoration(
+              labelText: 'Seus produtos',
+              alignLabelWithHint: true,
+              hintText: 'Arroz\n2x Leite\n1,5 kg Banana',
+              errorText: _error,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (_items.isNotEmpty) ...[
+            Text(
+              '${_items.length} produtos para adicionar',
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            for (final item in _items.take(4))
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Text(
+                  '${quantity(item.quantityMilli)} ${item.unit} · ${item.name}',
+                ),
+              ),
+            if (_items.length > 4)
+              Text('E mais ${_items.length - 4} produtos…'),
+          ],
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            onPressed: _items.isEmpty || _error != null
+                ? null
+                : () => Navigator.pop(context, _items),
+            icon: const Icon(Icons.playlist_add_check_rounded),
+            label: Text('Adicionar ${_items.length} produtos'),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 /// Quantidade, unidade, preço e total fiscal são conferidos antes de aceitar a entrada.
 Future<ProductEdit?> editProduct(
   BuildContext context, {
@@ -111,8 +294,20 @@ Future<ProductEdit?> editProduct(
     text: decimalInput(fiscalTotal ?? original?.totalCents ?? 0),
   );
   final form = GlobalKey<FormState>();
-  const units = ['un', 'kg', 'g', 'l', 'ml', 'pct', 'cx', 'pc', 'lt', 'und'];
-  var unit = units.contains(original?.unit) ? original!.unit : 'un';
+  final units = {
+    'un',
+    'kg',
+    'g',
+    'l',
+    'ml',
+    'pct',
+    'cx',
+    'pc',
+    'lt',
+    'und',
+    if (original != null) original.unit,
+  }.toList();
+  var unit = original?.unit ?? 'un';
   String? numberValidator(String? value, int digits, {bool positive = false}) {
     try {
       final parsed = parseScaled(value ?? '', digits);
@@ -195,18 +390,19 @@ Future<ProductEdit?> editProduct(
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: price,
-                  decoration: const InputDecoration(
-                    labelText: 'Preço por unidade / kg',
-                    prefixText: 'R\$ ',
+                if (receipt) const SizedBox(height: 12),
+                if (receipt)
+                  TextFormField(
+                    controller: price,
+                    decoration: const InputDecoration(
+                      labelText: 'Preço por unidade / kg',
+                      prefixText: 'R\$ ',
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    validator: (value) => numberValidator(value, 2),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  validator: (value) => numberValidator(value, 2),
-                ),
                 if (receipt)
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
@@ -233,7 +429,7 @@ Future<ProductEdit?> editProduct(
                       name: name.text.trim(),
                       quantityMilli: parseScaled(count.text, 3),
                       unit: unit,
-                      unitPriceCents: parseScaled(price.text, 2),
+                      unitPriceCents: receipt ? parseScaled(price.text, 2) : 0,
                       checked: original?.checked ?? false,
                     );
                     Navigator.pop(

@@ -1,59 +1,48 @@
-# Validação da entrega — 18/10/2026
+# Validação da versão 1.1.0 — 19/10/2026
 
-## Binário entregue
+## APKs entregues
 
-- Arquivo: `carrinho-de-compras-1.0.0.apk`.
-- Tamanho: **105.518.040 bytes** (aproximadamente 100,6 MiB / 105,5 MB).
-- SHA-256: `11881142655b83baafea8609cc85a08ab4299d485de856c9573656ea3531341c`.
-- Aplicação: **Carrinho de Compras**.
-- Pacote: `br.com.carrinhodecompras.carrinho_de_compras`.
-- Versão: `1.0.0`, código `1`.
-- Android mínimo: API 24, **Android 7.0**.
-- Android alvo/compilação: API 36.
-- Arquiteturas: `arm64-v8a`, `armeabi-v7a`, `x86_64`.
-- Assinatura: APK Signature Scheme **v2 válida**, certificado **Android Debug**, para teste por instalação direta.
-- Build: `flutter build apk --release`, concluído com código de saída 0.
-- Integridade ZIP: todas as entradas passaram na verificação CRC.
-- `allowBackup=false` confirmado no manifesto compilado.
-- Permissões do binário: internet, câmera, estado da rede e permissão interna de receiver não exportado das bibliotecas AndroidX.
+Ambos têm 105.944.844 bytes (aproximadamente 101 MiB), versão 1.1.0, código 2, Android mínimo 7.0/API 24, alvo/compilação API 36 e arquiteturas arm64-v8a, armeabi-v7a e x86_64.
 
-O arquivo `SHA256.txt` contém o mesmo hash para conferir a transferência. Este é um APK release de teste com assinatura de desenvolvimento; não é uma publicação na Play Store.
+| Arquivo | Aplicativo / identificador | SHA-256 |
+|---|---|---|
+| `carrinho-de-compras-1.1.0-teste.apk` | Carrinho Teste / `br.com.carrinhodecompras.carrinho_de_compras.teste` | `1d3951b8731460cd711b8c13af7008b37e737e7e8962b648d154c167f13af347` |
+| `carrinho-de-compras-1.1.0.apk` | Carrinho de Compras / `br.com.carrinhodecompras.carrinho_de_compras` | `d217a5d478255ba3223ca0a16aec96085e60236730ecb80f73aca039afd43f20` |
 
-## Verificações executadas
+Os arquivos SHA256-teste.txt e SHA256.txt contêm os hashes correspondentes. Os binários são distribuídos na release v1.1.0 do GitHub; não integram o histórico Git.
+
+## Instalação preservando o app atual
+
+Use **Carrinho Teste** para instalar ao lado da versão atual. Para testar com os dados existentes, exporte um backup em Ajustes no app atual e restaure o arquivo na cópia de teste. O formato do banco e do backup foi mantido.
+
+A assinatura dos APKs novos é válida (APK Signature Scheme v2, certificado Android Debug). A chave da versão 1.0.0 não estava disponível neste computador, e os certificados são diferentes:
+
+- Certificado da versão 1.0.0 publicada: `53c7954165133e0c8f6fe3e1ce307e4e780d4a1facd064fb3e8dfc31aff60444`.
+- Certificado desta entrega: `7f007734dba318e7acd03c55c325a6220a16aa4ca8351dd3f7147898c1d00d08`.
+
+Por isso, o APK com identificador original não atualiza diretamente a versão 1.0.0 publicada. Preserve o backup antes de qualquer reinstalação; a cópia de teste dispensa a remoção do app anterior. As chaves privadas não foram adicionadas ao repositório.
+
+## Verificações realizadas
 
 | Verificação | Resultado |
 |---|---|
-| `flutter analyze` | Nenhum problema encontrado. |
-| `flutter test` | **18 testes aprovados**, incluindo referências visuais. |
-| `dotnet test backend/Carrinho.Api.Tests/Carrinho.Api.Tests.csproj` | **13 testes aprovados**. |
-| Build Android release | Concluído. |
-| `apksigner verify --verbose --print-certs` | Assinatura válida. |
-| `aapt2 dump badging` e `aapt2 dump xmltree` | Identidade, ABIs e versões conferidas. |
-| ZIP/CRC e SHA-256 do APK | Válidos. |
-| Inventário de código | 60 arquivos, 5778 linhas; hashes correspondentes às fontes. |
+| `flutter analyze --no-pub` | Nenhum problema encontrado. |
+| `flutter test --no-pub` | 46 testes aprovados, incluindo referências visuais. |
+| Build Android release normal | Concluído, saída 0. |
+| Build Android release de teste separado | Concluído, saída 0. |
+| `apksigner verify --verbose --print-certs` | Assinatura v2 válida nos dois APKs. |
+| `aapt2 dump badging` / `dump xmltree` | Pacotes, nomes, versões, ABIs, Android mínimo/alvo e atividade de abertura conferidos. |
+| ZIP/CRC e SHA-256 | Válidos nos dois binários. |
+| Manifesto | `allowBackup=false`; Carrinho Teste aponta para a atividade nativa correta. |
+| Script PowerShell | Sintaxe e preflight aprovados; suporte a `-SideBySideTest`. |
+| Inventário do código | 65 arquivos e 7625 linhas; referência atualizada. |
 
-Os testes abrangem persistência real em SQLite, reabertura de arquivo, valores em centavos, quantidades por peso, duplicação de listas, proteção contra nota duplicada, exclusão com integridade referencial, backup/restauração e rollback, reconhecimento do cenário de oito itens, destinos de rede permitidos, respostas de erro e seleção correta do total fiscal.
+Cobertura adicionada: calendário por dia/semana/mês/ano/tudo, limites de períodos e virada de ano, entrada por linha e quantidades fracionadas, lote transacional com rollback, desfazer na posição original, soma de quantidades do mês anterior, preservação de preços fiscais/backups, criação da lista pela interface, edição sem preço, quantidade rápida, marcação de comprado, exclusão por gesto e falha imediata de gravação. Um teste acompanha a conferência da nota até o histórico e seus detalhes.
 
-## Consulta real da nota apresentada
+As telas foram renderizadas com fontes locais e conferidas em `docs/screenshots/listas.png` e `docs/screenshots/lista-aberta.png`. Os fluxos de interação também passaram em 360 × 800. As imagens usam dados sintéticos de teste.
 
-Foram feitas duas verificações, sem cadastrar a compra no banco do aplicativo:
+Ambiente: Flutter 3.47.7, Dart 3.13.5, Java 21, Android SDK 36, NDK 28.2.13676358. O SDK Flutter baixado teve seu SHA-256 conferido com o catálogo oficial antes da extração.
 
-1. API ASP.NET Core local: retornou os oito itens, data 18/10/2026, total 16153 centavos e soma das linhas de 16153 centavos.
-2. Cliente Dart incluído no aplicativo, em consulta direta: retornou os mesmos oito itens, data e valores.
+## Validação no aparelho
 
-Portanto, o caminho padrão do APK foi testado sem depender de backend hospedado. A disponibilidade futura da Sefaz e outros leiautes não são garantidos por esse teste pontual. A chave fiscal real e a foto não foram incorporadas às fixtures nem ao código.
-
-## Verificação visual
-
-As referências de widgets foram renderizadas com fontes locais e inspecionadas:
-
-- `docs/screenshots/listas.png`.
-- `docs/screenshots/lista-aberta.png`.
-
-Essas imagens usam dados sintéticos de QA; não são capturas de um Android físico.
-
-## Testes que dependem do seu aparelho
-
-Nenhum dispositivo Android estava conectado por ADB. Foco da câmera, permissões, captura de foto, seletor de arquivos, compartilhamento e reconhecimento OCR nativo precisam ser conferidos no celular. O APK foi compilado e verificado, mas não foi instalado em hardware físico neste ambiente.
-
-Sugestão de primeiro teste: instalar o APK, criar uma lista, fechar/reabrir o app para verificar persistência, escanear a nota apresentada e conferir os oito itens antes de salvar. Em Ajustes, exportar um backup depois de preencher dados que queira preservar.
+Nenhum Android físico estava conectado. Instalação, permissões, foco da câmera, fotografia, seletor, compartilhamento e OCR nativo ainda dependem do teste no celular. A consulta real da Sefaz e os testes .NET da entrega anterior não foram repetidos; o backend e o serviço fiscal não foram alterados nesta versão.

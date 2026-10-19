@@ -2,13 +2,13 @@
   "files": [
     {
       "file": ".gitignore",
-      "lines": 24,
-      "sha256": "45545aef5538d8dddb3111f574279e04b2b7ba83f954e6406325c157566c3182"
+      "lines": 25,
+      "sha256": "c1a4cb363ca799e1a17efacf871634a1ae52e208b46caa66e04ee5b7350a6088"
     },
     {
       "file": "backend/.dockerignore",
       "lines": 5,
-      "sha256": "876b3f3c597205fb561ff1304157745b0ea25c0e008fded007587ffa94e592a2"
+      "sha256": "e95e8ac7ab960610025842e67010acb2c8548f4aebb3c1a11ae571a67df61d44"
     },
     {
       "file": "backend/Carrinho.Api.Tests/Carrinho.Api.Tests.csproj",
@@ -18,7 +18,7 @@
     {
       "file": "backend/Carrinho.Api.Tests/FiscalTests.cs",
       "lines": 93,
-      "sha256": "c36baf65720fbd6e78a8f2a7222d2f13d74cd5aceff555e7a73b6b90f20642b9"
+      "sha256": "c607cb52ac701fd35f151b37f4fc6ccc577d24971b260ca27b29d631696a7dd0"
     },
     {
       "file": "backend/Carrinho.Api/Carrinho.Api.csproj",
@@ -28,7 +28,7 @@
     {
       "file": "backend/Carrinho.Api/Contracts/ReceiptContracts.cs",
       "lines": 13,
-      "sha256": "fd34cb43381a99399e76171f34621bc07347356b826527a6bbc22397a7624427"
+      "sha256": "11d88a0e540fb9be072e29678b4c37978fac3e05388b09d4ec51ca79401efee0"
     },
     {
       "file": "backend/Carrinho.Api/Program.cs",
@@ -43,17 +43,17 @@
     {
       "file": "backend/Carrinho.Api/Services/FiscalUrlPolicy.cs",
       "lines": 50,
-      "sha256": "da4b2d43c65d384ff888aa532d1a2590b77ab89e568a7c06b3d0b22913e64782"
+      "sha256": "bb4b28ff115083133d779e2b63e6a526f39a47ef253649b4d25412c93aceda7c"
     },
     {
       "file": "backend/Carrinho.Api/Services/ReceiptHtmlParser.cs",
       "lines": 83,
-      "sha256": "543d14d6d3fb9d1769e67feefc5cc133ca836cba1484cce55b23f40f16c3434c"
+      "sha256": "e42f639769470f4dfb992598b289f6309a82416d542ded1f51164aa9b54c0370"
     },
     {
       "file": "backend/Carrinho.Api/Services/SefazService.cs",
       "lines": 46,
-      "sha256": "f6d8ef62342ea56daee9242cd9c7722e932204f1d001c7a2211cdaa5c9062cd9"
+      "sha256": "8d39f14cbd045e7eb077780ba835f9e5e2a8bb4437b0ba4edb144057bc2c683b"
     },
     {
       "file": "backend/Carrinho.Api/appsettings.Development.json",
@@ -68,7 +68,7 @@
     {
       "file": "backend/Dockerfile",
       "lines": 15,
-      "sha256": "fba748c7d3b80cdccc79f6067a91db4bf75a91f703b0c997f75f346e66592d23"
+      "sha256": "a8835064ee83aac6840dae027099bba3beccd8a553c8aab172dc1e18973f059e"
     },
     {
       "file": "mobile/.gitignore",
@@ -82,13 +82,13 @@
     },
     {
       "file": "mobile/android/app/build.gradle.kts",
-      "lines": 51,
-      "sha256": "b1b370003e1e7690f8579c83233d87c64568c9547e9d96b1063099056dd29086"
+      "lines": 57,
+      "sha256": "25a39779ff23b452ac6ab62403565e2f47a1d2975f22c6c81c2f0caecd5122e5"
     },
     {
       "file": "mobile/android/app/proguard-rules.pro",
       "lines": 11,
-      "sha256": "7e4802211f0b07c02ecca576d7ba87ff18263719ab990123267fbfd16e88358c"
+      "sha256": "ae5e34f7e7f3e1f3da0dfcc88a9e793ccc3257b4cabc65c6e6f99e815806e1dc"
     },
     {
       "file": "mobile/android/app/src/debug/AndroidManifest.xml",
@@ -98,7 +98,7 @@
     {
       "file": "mobile/android/app/src/main/AndroidManifest.xml",
       "lines": 57,
-      "sha256": "d7e402e6cd2a6fa49b8507c30830a4f8cdbf3d74427a3d4cc2512e8e95ab654c"
+      "sha256": "fda4c5ff615858fb0b73e93e7d7d063969b6464cd46396cef03358c0cac5f118"
     },
     {
       "file": "mobile/android/app/src/main/kotlin/br/com/carrinhodecompras/carrinho_de_compras/MainActivity.kt",
@@ -113,7 +113,7 @@
     {
       "file": "mobile/android/app/src/main/res/drawable/ic_cart.xml",
       "lines": 7,
-      "sha256": "db1cd5f39fcbfffb485c94c7f9ae73ceb55eaad4fe6c28ff6d2e5fd66942256d"
+      "sha256": "0626b74a9840a2d3c80f5f1c35586ef5295062a557d11c84a5688b0b1536d878"
     },
     {
       "file": "mobile/android/app/src/main/res/drawable/launch_background.xml",
@@ -133,7 +133,7 @@
     {
       "file": "mobile/android/app/src/main/res/xml/network_security_config.xml",
       "lines": 11,
-      "sha256": "85f93816af68718fc002caf6e36b9f997bad5a5f00f91a03450c2353ce2a735f"
+      "sha256": "6453613bc4cec8bf2b0a90363262a7b463b0a196f36ca5df60ac69c36044da43"
     },
     {
       "file": "mobile/android/app/src/profile/AndroidManifest.xml",
@@ -163,144 +163,169 @@
     {
       "file": "mobile/lib/core/formatters.dart",
       "lines": 53,
-      "sha256": "04c967920de173bdd58012f4da2ba6c323011e0aa7ff1f4abeaaa16bb4a64c77"
+      "sha256": "ebd5809626afeb1fabb5736b71e0ff54a98c6a16ac794ba7d7e53dfffb288992"
     },
     {
       "file": "mobile/lib/data/fiscal_service.dart",
       "lines": 104,
-      "sha256": "c99eea5c8387368c8df6991eb6cd5a6085aeb0082e8d9752a989bc4776d151a4"
+      "sha256": "71b14c50b43bcc38a30ed7e0695a77593202e28cf53455a7397cf05d64bfe03f"
     },
     {
       "file": "mobile/lib/data/local_database.dart",
       "lines": 52,
-      "sha256": "633dace780a6a5019f8e89235a577f833d323a816aef4cd390a82edda80a1c66"
+      "sha256": "cafddc8391c0362dcf52e6d275df8ab89235eceacfd6a3481dd32bb180bddf5d"
     },
     {
       "file": "mobile/lib/data/ocr_service.dart",
       "lines": 52,
-      "sha256": "eb2502fdce434853c7ff0cd07389bdef2dce54be49657cb706d31f2d6aaad1d8"
+      "sha256": "9793c588bf3857d684ce35156f25e95e95302056f89a9a1e040ac3c4841d2bef"
     },
     {
       "file": "mobile/lib/data/receipt_parser.dart",
       "lines": 221,
-      "sha256": "fda6d39cbce1147bdf51a6696cc8f8bb17888e1bf10002f03f5446258d4eb6fa"
+      "sha256": "07edeb6c69c8dd27601157b10f5d146483347aca844cc911917ec0140c8f1ec0"
     },
     {
       "file": "mobile/lib/data/shopping_repository.dart",
-      "lines": 331,
-      "sha256": "07996f2da4a407c8f94e15d5ca5cb873b9f13858f5d548449ec80d3199d55c2e"
+      "lines": 464,
+      "sha256": "562fd885a27cdfb12e17c4a23c7df609aaf6c7d870c9c3c99db18cc2d7b57b45"
+    },
+    {
+      "file": "mobile/lib/domain/history_period.dart",
+      "lines": 66,
+      "sha256": "dc789cf5eac0b93e193d5d96bf95290f1028e0a915bb921438d58e8829b470ff"
+    },
+    {
+      "file": "mobile/lib/domain/list_input.dart",
+      "lines": 53,
+      "sha256": "985cb957b0d3924abdf771b7d39e2192cecd1a6565226a055300b1ba36ff6d65"
     },
     {
       "file": "mobile/lib/domain/models.dart",
       "lines": 187,
-      "sha256": "dc663edb3005a4f28331ae2d97315c74e987ab4583ad9146d18e0c336430da5e"
+      "sha256": "d874fbbaffd8f19f80818a8d7eb5390e2823d7bbd4f1146abe4e5a968f88d1a4"
     },
     {
       "file": "mobile/lib/main.dart",
       "lines": 38,
-      "sha256": "cb7ee7139fe80ca56dde0c41ebe18db7b3db05839143f409a9fef5307f6beb17"
+      "sha256": "de8805e5fb27a15594120e7424e2aa0ca88104971094fc7fb75798f445fa05b6"
     },
     {
       "file": "mobile/lib/ui/app.dart",
       "lines": 22,
-      "sha256": "064e1c0d00f34d14fec49b680bea85fd789ce677e109291bb488bd1c0a2ab268"
+      "sha256": "601eccb1efbda876a0f1e60444357fc06b6b7c287160e940da546961774db392"
     },
     {
       "file": "mobile/lib/ui/app_view_model.dart",
       "lines": 39,
-      "sha256": "1b21987166c194f26cb9d853f98d851ffd6cd8379c3ea39714f67151d9295452"
+      "sha256": "6a9ad4a36cce926548b8a90c26c5da1c74187a0c12305735035fdaa78dd6c00e"
     },
     {
       "file": "mobile/lib/ui/dialogs.dart",
-      "lines": 262,
-      "sha256": "3699a4ce4cc17269e8330ebdeca31e6388624c7a7c6f6b370ced2ca6c8803a03"
+      "lines": 458,
+      "sha256": "1e13e1d05ec3518867c19d26633dd573b4d86bb26cbad84f5c681c18417bea60"
     },
     {
       "file": "mobile/lib/ui/history_screen.dart",
-      "lines": 258,
-      "sha256": "60e145d0a62861de557d0db147065022fbc42358ef00eb86300d747eef41c2ba"
+      "lines": 360,
+      "sha256": "d9ee36bbf4bba6bbdf54849f3218585d35ab5d6954f9f301befaa7bcfa2a3335"
     },
     {
       "file": "mobile/lib/ui/home_screen.dart",
-      "lines": 272,
-      "sha256": "49918afc3247bacc9315354c43362da276c58ca14b7b839f7f6f14224963e7e9"
+      "lines": 371,
+      "sha256": "03499ca6eccf0f998d51588e528fea81a4bf3c869525aeefeb90518713bb36eb"
     },
     {
       "file": "mobile/lib/ui/list_screen.dart",
-      "lines": 336,
-      "sha256": "001b9cf9eb85b4e24c08cf81937a3ff6b27580659f49561c27d9565144ba4a2a"
+      "lines": 520,
+      "sha256": "695fdb13db42ac9588464060c69d854e0f0977ef615aae0abece2b48ce378785"
     },
     {
       "file": "mobile/lib/ui/receipt_review_screen.dart",
       "lines": 312,
-      "sha256": "5d4505f702188a821ffb3b3c7df26911f8a5ca06bbd1e71689cfff4ae3a40fcc"
+      "sha256": "73dec1af051ce2e36101c0454cea0d10b3cc947e9763baae1ee25ac23c52b2ae"
     },
     {
       "file": "mobile/lib/ui/scan_screen.dart",
       "lines": 301,
-      "sha256": "5aea1ceeb5e96d0d0684a7901ffaecc0e070e912610175e57318719dbf95c82d"
+      "sha256": "d78c5deb93d1b392175981ef62a93480bb1a430cd10e0c4417c59a1c29b984bc"
     },
     {
       "file": "mobile/lib/ui/settings_screen.dart",
       "lines": 246,
-      "sha256": "7b501d4915085ebf06184b9847de94b88cf836453afdb7318ba3358fa062564e"
+      "sha256": "4718d06f8c5eac90440f2c892956834d2bfb63769c3aeb2c3288bf95932e6dba"
     },
     {
       "file": "mobile/lib/ui/theme.dart",
-      "lines": 72,
-      "sha256": "0610d5ae1f90dc59f16b52a80970dfc70f118ac94a1951a4d761b1301b3881f5"
+      "lines": 113,
+      "sha256": "3893875bdb11be8c55fc4413d48e8bc01c14f663b92e926e1abba090938c6c56"
     },
     {
       "file": "mobile/lib/ui/widgets.dart",
-      "lines": 129,
-      "sha256": "5f5703d8f35ff3d5e128d8f89b2d4f6f655f72fee48e02021cd2eca62fc46cc8"
+      "lines": 131,
+      "sha256": "df6aea9b8aa169bf2b46bdd081e5b2185f00cddcc7dac5db1bde1ce39d559ebd"
     },
     {
       "file": "mobile/pubspec.lock",
       "lines": 879,
-      "sha256": "13854e6985b47bac617c9f656c2d54349ecd08c5c06c8b5ad1775fbc1d147627"
+      "sha256": "a60edd8d706025b0980c22cd606f1b554ec034bca09f05cf342870b724a44999"
     },
     {
       "file": "mobile/pubspec.yaml",
       "lines": 48,
-      "sha256": "e9d07abba25caf92e78bcab989ed80a2dac7b7ed8c7d613ba7a3902e65bb976b"
+      "sha256": "7571363aff5c443b0d7cdd35c3c5ff9f4ce007667b1dc72e537e196cb1996280"
     },
     {
       "file": "mobile/test/app_widget_test.dart",
-      "lines": 91,
-      "sha256": "ea5a817f16ef51befc8d4b434fa374f4994f03ecaa394cea4c7e03d435f87390"
+      "lines": 355,
+      "sha256": "2ad5b6e5b0ca766e9ef512d594c62b0c4fd0e3d35c1a3d3d917066ba14086842"
+    },
+    {
+      "file": "mobile/test/history_period_test.dart",
+      "lines": 84,
+      "sha256": "cf1e4e5569c0ffd29f067bc11f1d0f978e2816f6dc2b7ca38a161c65281f249f"
+    },
+    {
+      "file": "mobile/test/list_input_test.dart",
+      "lines": 79,
+      "sha256": "99d594f616019ec6e056b25f35b7125cea108905ffe8fed6e246ffa6d636b75d"
     },
     {
       "file": "mobile/test/money_and_parser_test.dart",
       "lines": 104,
-      "sha256": "e72d10aa8dfd15dde7ea8c3b37cd594cabd76067a73798db7898f25a6105ad58"
+      "sha256": "1a304f4cc414cc7b7cda1c1ed8d7dafcdb1088f45ed36027dc6e6d79b4c993b9"
+    },
+    {
+      "file": "mobile/test/receipt_history_flow_test.dart",
+      "lines": 210,
+      "sha256": "a450293d16d233ac000a8150d3c16744ba6419be2176595ea1ef813a5e17363a"
     },
     {
       "file": "mobile/test/repository_test.dart",
-      "lines": 153,
-      "sha256": "3a505601a0a170f193bb7cc1627386341e38d28e6f52161e6cf3c704f7b97626"
+      "lines": 384,
+      "sha256": "96e6810c0f3a57336db9c5fbdeebdeda00a8dfb49e69539bfe3ec2c6718d1b4e"
     },
     {
       "file": "mobile/tool/consult_receipt.dart",
       "lines": 38,
-      "sha256": "bc3db74516da21047376c5e447aa3cc46ccf3752e57e04077f3822ac46f10877"
+      "sha256": "7e4f5eb295fad38fadce14aab0dde51da18c823e096a506a2ed0a784dca5f21c"
     },
     {
       "file": "scripts/build-apk.ps1",
-      "lines": 45,
-      "sha256": "54e57172c8ab706135243f02ea489baa542c4e6f329d22e498cbeee68e3b4a38"
+      "lines": 139,
+      "sha256": "402a3464d059d1d192ad73a48b1bf6102a48b798540b6e2771a316cd71adf18a"
     },
     {
       "file": "scripts/generate-line-report.py",
-      "lines": 329,
-      "sha256": "7f1b4d0140a80ef037a190d1c05b641cb624542429dc949e453407be88e5f8ab"
+      "lines": 331,
+      "sha256": "8473bcb5822738ad7d46535ce9ecf961d99fc7a2c01545b98a010acabc2fa560"
     },
     {
       "file": "scripts/run-backend.ps1",
       "lines": 6,
-      "sha256": "b6bb86a92e96a4916c4463548ce871c676195c56c519897cf883a61afb79a470"
+      "sha256": "56bf370dedeebc0cff10f32766f6be4bff3d356662e013c39f9f4d98520f0749"
     }
   ],
-  "totalFiles": 60,
-  "totalLines": 5778
+  "totalFiles": 65,
+  "totalLines": 7625
 }

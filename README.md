@@ -2,11 +2,24 @@
 
 Aplicativo **Flutter/Dart para Android** com listas de supermercado, SQLite privado, histórico de compras, consulta de NFC-e de São Paulo e reconhecimento local de fotos de notas. O backend opcional é **ASP.NET Core 10**.
 
-**[Baixar APK Android — versão 1.0.0](https://github.com/PedroHda/CarrinhoDeCompras/releases/download/v1.0.0/carrinho-de-compras-1.0.0.apk)** · [Release e arquivos de validação](https://github.com/PedroHda/CarrinhoDeCompras/releases/tag/v1.0.0)
+**[Baixar APK Android para teste — versão 1.1.0](https://github.com/PedroHda/CarrinhoDeCompras/releases/download/v1.1.0/carrinho-de-compras-1.1.0-teste.apk)** · [Release e arquivos de validação](https://github.com/PedroHda/CarrinhoDeCompras/releases/tag/v1.1.0)
+
+A cópia acima aparece como **Carrinho Teste** e instala ao lado do app anterior. Para testar com seus dados, exporte o backup em Ajustes no app atual e restaure na cópia de teste. O [APK com o identificador original](https://github.com/PedroHda/CarrinhoDeCompras/releases/download/v1.1.0/carrinho-de-compras-1.1.0.apk) também está disponível. A assinatura é diferente da versão 1.0.0 publicada, cuja chave não está neste ambiente; ele não a atualiza diretamente. Preserve o backup antes de qualquer reinstalação.
+
+## Novidades da versão 1.1.0
+
+- Histórico por dia, semana (segunda a domingo), mês, ano e todo o período, com setas e seleção de data.
+- Listas com produtos e quantidades, sem preços ou total estimado.
+- Criação item a item, por texto com um produto por linha ou a partir de todas as compras do mês calendário anterior.
+- Na entrada por texto, `Leite` adiciona 1 unidade, `2x Leite` adiciona 2 e `1,5 kg Banana` conserva a quantidade por peso.
+- A lista do mês anterior soma quantidades de descrições iguais (ignorando caixa e espaços repetidos), mantém unidades diferentes separadas e começa desmarcada.
+- Edição por toque, quantidade pelos botões +/−, marcação no carrinho e exclusão por deslize com **Desfazer**.
+- Nova identidade visual em roxo e coral. Notas conferidas continuam salvas no histórico com os valores originais.
 
 ## Entrega
 
-- `artifacts/carrinho-de-compras-1.0.0.apk`: APK release de teste, assinado com chave de desenvolvimento.
+- `artifacts/carrinho-de-compras-1.1.0.apk`: APK release de teste, assinado com chave de desenvolvimento.
+- `artifacts/carrinho-de-compras-1.1.0-teste.apk`: cópia Carrinho Teste, para instalar ao lado da versão atual.
 - `docs/RELATORIO.md`: funcionamento, arquitetura, execução, banco, validação e limitações.
 - `docs/LINHA_A_LINHA.md`: inventário do código e explicação de cada linha dos arquivos de implementação/configuração.
 - `mobile/`: aplicativo solicitado em Flutter.
@@ -19,7 +32,7 @@ O diretório `carrinho-de-compras/` contém o protótipo Expo que já existia. E
 
 Baixe o APK na release acima ou use o arquivo local de `artifacts/`, transfira para seu celular e abra o arquivo. Autorize a instalação pela origem escolhida quando o Android solicitar. Requer Android 7.0 ou superior. O pacote é universal, com ARM de 32/64 bits e x86_64. O binário é distribuído pelas releases; o repositório Git contém seu código-fonte, documentação e checksum.
 
-Na primeira execução, crie uma lista, adicione produtos e marque os comprados. Ao concluir, confira estabelecimento, data e valores. As compras ficam no Histórico. Nenhuma conta é necessária.
+Na primeira execução, toque em **Nova lista** e escolha uma das três formas de criação. Marque os produtos que colocar no carrinho. Ao concluir uma compra manual, confira estabelecimento, data e valores na tela de conferência. As compras ficam no Histórico. Nenhuma conta é necessária.
 
 Para a nota fiscal, use **Escanear ou fotografar nota**. A consulta direta usa a internet. O reconhecimento de foto é local; confira e corrija os resultados antes de salvar. Se a consulta da Sefaz falhar, as listas continuam disponíveis.
 
@@ -39,7 +52,9 @@ No Windows, Gradle e a análise do Dart podem falhar em caminhos com acentos. O 
 .\scripts\build-apk.ps1
 ```
 
-Os parâmetros `-Flutter`, `-AndroidSdk` e `-JavaHome` permitem usar ferramentas instaladas em outros caminhos. O script não remove nem move os arquivos originais.
+Para gerar a cópia que instala ao lado da versão atual, use `-SideBySideTest` no mesmo script.
+
+O script detecta Flutter, Android SDK e Java, valida a versão do Dart e deriva o nome do APK da versão do projeto. Os parâmetros `-Flutter`, `-AndroidSdk`, `-JavaHome` e `-StageDirectory` permitem usar outros caminhos. `-PreflightOnly` confere o ambiente e `-PrepareOnly` prepara as dependências. A compilação usa uma cópia nova em `mobile/build/` (ou no temporário se o caminho tiver acentos), sem remover os arquivos originais.
 
 ## Backend opcional
 

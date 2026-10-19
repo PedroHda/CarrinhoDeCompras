@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'theme.dart';
+
 /// Aviso compacto para explicar conexão, conferência e diferenças de valores.
 class NoteBox extends StatelessWidget {
   const NoteBox(
@@ -15,7 +17,7 @@ class NoteBox extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: warning ? const Color(0xFFFFF2DC) : const Color(0xFFEAF2ED),
+      color: warning ? const Color(0xFFFFF2DC) : AppColors.lavender,
       borderRadius: BorderRadius.circular(16),
     ),
     child: Row(
@@ -24,7 +26,7 @@ class NoteBox extends StatelessWidget {
         Icon(
           icon,
           size: 20,
-          color: warning ? const Color(0xFF94631C) : const Color(0xFF276447),
+          color: warning ? const Color(0xFF94631C) : AppColors.primary,
         ),
         const SizedBox(width: 10),
         Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
@@ -56,7 +58,7 @@ class EmptyState extends StatelessWidget {
           width: 88,
           height: 88,
           decoration: const BoxDecoration(
-            color: Color(0xFFE3F1E8),
+            color: AppColors.lavender,
             shape: BoxShape.circle,
           ),
           child: Icon(

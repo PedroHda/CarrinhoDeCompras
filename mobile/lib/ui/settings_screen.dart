@@ -231,7 +231,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       const SizedBox(height: 28),
       const Center(
         child: Text(
-          'Carrinho de Compras\nVersão 1.0.0 • Android',
+          'Carrinho de Compras\nVersão 1.1.0 • Android',
           textAlign: TextAlign.center,
           style: TextStyle(color: Colors.grey, fontSize: 12),
         ),

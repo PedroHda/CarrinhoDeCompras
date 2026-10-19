@@ -1,4 +1,5 @@
 # Dependências e compilações reproduzíveis do Flutter.
+.tools/
 mobile/.dart_tool/
 mobile/.flutter-plugins-dependencies
 mobile/build/

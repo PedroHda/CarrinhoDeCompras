@@ -1,7 +1,7 @@
 name: carrinho_de_compras
 description: "Listas de supermercado com SQLite privado, histórico e importação de NFC-e."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.13.5

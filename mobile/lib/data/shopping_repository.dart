@@ -51,14 +51,22 @@ class ShoppingRepository {
     return result;
   }
 
-  /// Cria uma lista vazia e retorna a identidade usada na navegação.
-  Future<String> createList(String name) async {
+  /// Cria a lista e seu lote inicial juntos, sem deixar uma lista parcial.
+  Future<String> createList(
+    String name, {
+    List<ShoppingItem> items = const [],
+  }) async {
     final id = _uuid.v4();
-    await _db.insert('lists', {
-      'id': id,
-      'name': name.trim(),
-      'created_at': DateTime.now().toIso8601String(),
-      'completed': 0,
+    await _db.transaction((txn) async {
+      await _insertList(
+        txn,
+        ShoppingList(
+          id: id,
+          name: name.trim(),
+          createdAt: DateTime.now(),
+          items: items,
+        ),
+      );
     });
     return id;
   }
@@ -79,25 +87,131 @@ class ShoppingRepository {
 
   /// Upsert conserva a posição de um item existente e adiciona novos ao final.
   Future<void> saveItem(String listId, ShoppingItem item) async {
-    final old = await _db.query(
-      'list_items',
-      columns: ['position'],
-      where: 'id = ?',
-      whereArgs: [item.id],
-    );
-    final position = old.isEmpty
-        ? DateTime.now().microsecondsSinceEpoch
-        : old.first['position'];
-    await _db.insert('list_items', {
-      'id': item.id,
-      'list_id': listId,
-      'name': item.name,
-      'quantity_milli': item.quantityMilli,
-      'unit': item.unit,
-      'unit_price_cents': item.unitPriceCents,
-      'checked': item.checked ? 1 : 0,
-      'position': position,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    await _db.transaction((txn) async {
+      final old = await txn.query(
+        'list_items',
+        columns: ['position'],
+        where: 'id = ? AND list_id = ?',
+        whereArgs: [item.id, listId],
+      );
+      final position = old.isEmpty
+          ? await _nextPosition(txn, listId)
+          : old.first['position'] as int;
+      await _insertItem(
+        txn,
+        listId,
+        item,
+        position,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
+  }
+
+  /// Adiciona o lote na ordem digitada; uma falha não deixa itens pela metade.
+  Future<void> addItems(String listId, List<ShoppingItem> items) async {
+    if (items.isEmpty) return;
+    await _db.transaction((txn) async {
+      var position = await _nextPosition(txn, listId);
+      for (final item in items) {
+        await _insertItem(txn, listId, item, position++);
+      }
+    });
+  }
+
+  /// Desfazer recoloca o item antes do próximo vizinho, preservando sua identidade.
+  Future<void> restoreItem(
+    String listId,
+    ShoppingItem item, {
+    String? beforeItemId,
+  }) async {
+    await _db.transaction((txn) async {
+      final rows = await txn.query(
+        'list_items',
+        columns: ['id'],
+        where: 'list_id = ? AND id != ?',
+        whereArgs: [listId, item.id],
+        orderBy: 'position',
+      );
+      final orderedIds = rows.map((row) => row['id'] as String).toList();
+      final before = beforeItemId == null
+          ? -1
+          : orderedIds.indexOf(beforeItemId);
+      final index = before < 0 ? orderedIds.length : before;
+      orderedIds.insert(index, item.id);
+      await _insertItem(
+        txn,
+        listId,
+        item,
+        index,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      for (var position = 0; position < orderedIds.length; position++) {
+        await txn.update(
+          'list_items',
+          {'position': position},
+          where: 'id = ? AND list_id = ?',
+          whereArgs: [orderedIds[position], listId],
+        );
+      }
+    });
+  }
+
+  /// Conclui o planejamento sem inventar uma compra ou preços no histórico.
+  Future<void> completeList(String listId) async => _db.update(
+    'lists',
+    {'completed': 1},
+    where: 'id = ?',
+    whereArgs: [listId],
+  );
+
+  /// Reúne as compras do mês calendário anterior, inclusive na virada do ano.
+  /// Unidades diferentes não se somam; preços pagos ficam apenas no histórico.
+  Future<String?> createListFromPreviousMonth(
+    String name, {
+    DateTime? referenceDate,
+  }) async {
+    final reference = (referenceDate ?? DateTime.now()).toLocal();
+    final start = DateTime(reference.year, reference.month - 1);
+    final end = DateTime(reference.year, reference.month);
+    return _db.transaction((txn) async {
+      final rows = await txn.rawQuery('''
+        SELECT p.issued_at, pi.description, pi.quantity_milli, pi.unit
+        FROM purchases p JOIN purchase_items pi ON pi.purchase_id = p.id
+        ORDER BY p.issued_at, p.id, pi.position
+      ''');
+      final grouped = <String, ShoppingItem>{};
+      for (final row in rows) {
+        final issuedAt = DateTime.parse(row['issued_at'] as String).toLocal();
+        if (issuedAt.isBefore(start) || !issuedAt.isBefore(end)) continue;
+        final description = _cleanText(row['description'] as String);
+        final unit = _cleanText(row['unit'] as String).toLowerCase();
+        final key = jsonEncode([description.toLowerCase(), unit]);
+        final existing = grouped[key];
+        final quantity = row['quantity_milli'] as int;
+        grouped[key] = existing == null
+            ? ShoppingItem(
+                id: _uuid.v4(),
+                name: description,
+                quantityMilli: quantity,
+                unit: unit,
+              )
+            : existing.copyWith(
+                quantityMilli: existing.quantityMilli + quantity,
+              );
+      }
+      if (grouped.isEmpty) return null;
+      final id = _uuid.v4();
+      await _insertList(
+        txn,
+        ShoppingList(
+          id: id,
+          name: name.trim(),
+          createdAt: DateTime.now(),
+          items: grouped.values.toList(),
+        ),
+      );
+      return id;
+    });
   }
 
   /// Duplicar cria novas identidades e desmarca itens; o histórico original fica preservado.
@@ -117,7 +231,7 @@ class ShoppingRepository {
                   name: item.name,
                   quantityMilli: item.quantityMilli,
                   unit: item.unit,
-                  unitPriceCents: item.unitPriceCents,
+                  unitPriceCents: 0,
                 ),
               )
               .toList(),
@@ -289,18 +403,37 @@ class ShoppingRepository {
     });
     for (var index = 0; index < list.items.length; index++) {
       final item = list.items[index];
-      await txn.insert('list_items', {
-        'id': item.id,
-        'list_id': list.id,
-        'name': item.name,
-        'quantity_milli': item.quantityMilli,
-        'unit': item.unit,
-        'unit_price_cents': item.unitPriceCents,
-        'checked': item.checked ? 1 : 0,
-        'position': index,
-      });
+      await _insertItem(txn, list.id, item, index);
     }
   }
+
+  static String _cleanText(String value) =>
+      value.trim().replaceAll(RegExp(r'\s+'), ' ');
+
+  Future<int> _nextPosition(DatabaseExecutor txn, String listId) async {
+    final rows = await txn.rawQuery(
+      'SELECT MAX(position) AS last_position FROM list_items WHERE list_id = ?',
+      [listId],
+    );
+    return (rows.single['last_position'] as int? ?? -1) + 1;
+  }
+
+  Future<void> _insertItem(
+    DatabaseExecutor txn,
+    String listId,
+    ShoppingItem item,
+    int position, {
+    ConflictAlgorithm? conflictAlgorithm,
+  }) async => txn.insert('list_items', {
+    'id': item.id,
+    'list_id': listId,
+    'name': item.name,
+    'quantity_milli': item.quantityMilli,
+    'unit': item.unit,
+    'unit_price_cents': item.unitPriceCents,
+    'checked': item.checked ? 1 : 0,
+    'position': position,
+  }, conflictAlgorithm: conflictAlgorithm);
 
   /// Guarda a posição de cada linha para reproduzir a ordem da nota original.
   Future<void> _insertPurchase(DatabaseExecutor txn, Purchase purchase) async {

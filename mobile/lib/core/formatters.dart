@@ -50,4 +50,4 @@ String decimalInput(int scaled, {int digits = 2}) =>
 
 /// Datas são exibidas no calendário local do usuário.
 String shortDate(DateTime value) =>
-    DateFormat('dd/MM/yyyy', 'pt_BR').format(value);
+    DateFormat('dd/MM/yyyy', 'pt_BR').format(value.toLocal());

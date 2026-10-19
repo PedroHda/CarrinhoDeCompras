@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../core/formatters.dart';
+import '../domain/history_period.dart';
 import '../domain/models.dart';
 import 'app_view_model.dart';
 import 'dialogs.dart';
 import 'widgets.dart';
 
-/// Pesquisa local por estabelecimento ou produto e filtro por mês de compra.
+/// Pesquisa por estabelecimento ou produto com períodos do calendário local.
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key, required this.model});
   final AppViewModel model;
@@ -17,24 +18,75 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   String _search = '';
-  String _period = 'all';
+  HistoryPeriod _period = HistoryPeriod.all;
+  DateTime _reference = DateTime.now();
+
+  String _periodName(HistoryPeriod period) => switch (period) {
+    HistoryPeriod.day => 'Dia',
+    HistoryPeriod.week => 'Semana',
+    HistoryPeriod.month => 'Mês',
+    HistoryPeriod.year => 'Ano',
+    HistoryPeriod.all => 'Tudo',
+  };
+
+  String _rangeLabel(HistoryDateRange? range) {
+    if (range == null) return 'Todo o período';
+    return switch (_period) {
+      HistoryPeriod.day => DateFormat(
+        'dd MMM yyyy',
+        'pt_BR',
+      ).format(range.start),
+      HistoryPeriod.week =>
+        '${DateFormat('dd/MM/yyyy').format(range.start)} a '
+            '${DateFormat('dd/MM/yyyy').format(DateTime(range.end.year, range.end.month, range.end.day - 1))}',
+      HistoryPeriod.month => DateFormat(
+        'MMMM yyyy',
+        'pt_BR',
+      ).format(range.start),
+      HistoryPeriod.year => DateFormat('yyyy').format(range.start),
+      HistoryPeriod.all => 'Todo o período',
+    };
+  }
+
+  Future<void> _chooseReference() async {
+    final firstDate = DateTime(1900);
+    final lastDate = DateTime(2200, 12, 31);
+    final initialDate = _reference.isBefore(firstDate)
+        ? firstDate
+        : _reference.isAfter(lastDate)
+        ? lastDate
+        : _reference;
+    final chosen = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      helpText: 'Escolha uma data do período',
+    );
+    if (chosen != null && mounted) setState(() => _reference = chosen);
+  }
+
+  void _movePeriod(int offset) => setState(
+    () => _reference = shiftHistoryReference(_period, _reference, offset),
+  );
 
   @override
   Widget build(BuildContext context) {
-    String periodKey(Purchase purchase) =>
-        DateFormat('yyyy-MM').format(purchase.receipt.issuedAt);
-    final months = widget.model.purchases.map(periodKey).toSet().toList()
-      ..sort((a, b) => b.compareTo(a));
-    if (_period != 'all' && !months.contains(_period)) _period = 'all';
-    final filtered = widget.model.purchases
-        .where(
-          (purchase) =>
-              (_period == 'all' || periodKey(purchase) == _period) &&
-              '${purchase.receipt.merchant} ${purchase.receipt.items.map((item) => item.description).join(' ')}'
-                  .toLowerCase()
-                  .contains(_search.toLowerCase()),
-        )
-        .toList();
+    final colors = Theme.of(context).colorScheme;
+    final range = historyDateRange(_period, _reference);
+    final search = _search.trim().toLowerCase();
+    final filtered =
+        widget.model.purchases
+            .where(
+              (purchase) =>
+                  (range == null ||
+                      range.contains(purchase.receipt.issuedAt)) &&
+                  '${purchase.receipt.merchant} ${purchase.receipt.items.map((item) => item.description).join(' ')}'
+                      .toLowerCase()
+                      .contains(search),
+            )
+            .toList()
+          ..sort((a, b) => b.receipt.issuedAt.compareTo(a.receipt.issuedAt));
     final total = filtered.fold<int>(
       0,
       (sum, purchase) => sum + purchase.totalCents,
@@ -46,45 +98,83 @@ class _HistoryScreenState extends State<HistoryScreen> {
           'Histórico',
           subtitle: 'O que você comprou, quando e por quanto.',
         ),
-        DropdownButtonFormField<String>(
-          initialValue: _period,
-          decoration: const InputDecoration(
-            labelText: 'Período',
-            prefixIcon: Icon(Icons.calendar_month_outlined),
-          ),
-          items: [
-            const DropdownMenuItem(
-              value: 'all',
-              child: Text('Todos os períodos'),
-            ),
-            ...months.map(
-              (month) => DropdownMenuItem(
-                value: month,
-                child: Text(
-                  DateFormat(
-                    'MMMM yyyy',
-                    'pt_BR',
-                  ).format(DateTime.parse('$month-01')),
-                ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            for (final period in HistoryPeriod.values)
+              ChoiceChip(
+                label: Text(_periodName(period)),
+                selected: _period == period,
+                onSelected: (_) => setState(() => _period = period),
+              ),
+          ],
+        ),
+        if (range != null) ...[
+          const SizedBox(height: 10),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Período anterior',
+                    onPressed: () => _movePeriod(-1),
+                    icon: const Icon(Icons.chevron_left),
+                  ),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: _chooseReference,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _rangeLabel(range),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 3),
+                          const Text(
+                            'Toque para escolher a data',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Próximo período',
+                    onPressed: () => _movePeriod(1),
+                    icon: const Icon(Icons.chevron_right),
+                  ),
+                ],
               ),
             ),
-          ],
-          onChanged: (value) => setState(() => _period = value!),
-        ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () => setState(() => _reference = DateTime.now()),
+              icon: const Icon(Icons.today_outlined, size: 17),
+              label: const Text('Período atual'),
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
-            color: const Color(0xFFE0F1E5),
+            color: colors.primary,
             borderRadius: BorderRadius.circular(22),
           ),
           child: Row(
             children: [
-              const CircleAvatar(
-                backgroundColor: Color(0xFFCBE7D4),
+              CircleAvatar(
+                backgroundColor: colors.onPrimary.withValues(alpha: 0.18),
                 child: Icon(
                   Icons.account_balance_wallet_outlined,
-                  color: Color(0xFF147D50),
+                  color: colors.onPrimary,
                 ),
               ),
               const SizedBox(width: 16),
@@ -92,17 +182,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Total no período'),
+                    Text(
+                      _rangeLabel(range),
+                      style: TextStyle(color: colors.onPrimary),
+                    ),
                     Text(
                       money(total),
-                      style: const TextStyle(
+                      style: TextStyle(
+                        color: colors.onPrimary,
                         fontSize: 30,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     Text(
-                      '${filtered.length} compras',
-                      style: const TextStyle(fontSize: 12),
+                      '${filtered.length} ${filtered.length == 1 ? 'compra' : 'compras'}${search.isEmpty ? '' : ' na busca'}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colors.onPrimary.withValues(alpha: 0.85),
+                      ),
                     ),
                   ],
                 ),
@@ -120,10 +217,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
         const SizedBox(height: 18),
         if (filtered.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.receipt_long_outlined,
-            title: 'Cada compra conta uma história',
-            description: 'Conclua uma lista ou importe uma nota. Os produtos e valores pagos ficam registrados aqui.',
+            title: search.isNotEmpty
+                ? 'Nenhuma compra encontrada'
+                : range != null
+                ? 'Nenhuma compra neste período'
+                : 'Cada compra conta uma história',
+            description: search.isNotEmpty
+                ? 'Tente outro mercado ou produto, ou mude o período.'
+                : range != null
+                ? 'Escolha outra data ou toque em Tudo para ver suas compras.'
+                : 'Importe uma nota para guardar os produtos, quantidades e valores pagos aqui.',
           ),
         for (final purchase in filtered)
           Padding(
@@ -131,12 +236,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
             child: Card(
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0xFFE8F2EB),
-                  child: Icon(
-                    Icons.storefront_outlined,
-                    color: Color(0xFF147D50),
-                  ),
+                leading: CircleAvatar(
+                  backgroundColor: colors.primary.withValues(alpha: 0.10),
+                  child: Icon(Icons.storefront_outlined, color: colors.primary),
                 ),
                 title: Text(
                   purchase.receipt.merchant,

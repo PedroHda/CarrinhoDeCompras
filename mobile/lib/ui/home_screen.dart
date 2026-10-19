@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-import '../core/formatters.dart';
 import '../domain/models.dart';
 import 'app_view_model.dart';
 import 'dialogs.dart';
@@ -8,6 +8,7 @@ import 'history_screen.dart';
 import 'list_screen.dart';
 import 'scan_screen.dart';
 import 'settings_screen.dart';
+import 'theme.dart';
 import 'widgets.dart';
 
 /// Navegação principal conserva o estado das três abas durante a sessão.
@@ -22,19 +23,55 @@ class _HomeScreenState extends State<HomeScreen> {
   int _tab = 0;
   bool _completed = false;
   String _search = '';
+  bool _creating = false;
 
   /// O nome validado é persistido antes de abrir a lista recém-criada.
   Future<void> _newList() async {
-    final name = await askName(context);
+    final mode = await chooseListCreation(context);
+    if (mode == null || !mounted) return;
+    final previous = DateTime(DateTime.now().year, DateTime.now().month - 1);
+    final name = await askName(
+      context,
+      initial: mode == ListCreation.previousMonth
+          ? 'Compras de ${DateFormat('MMMM', 'pt_BR').format(DateTime.now())}'
+          : '',
+      title: mode == ListCreation.previousMonth
+          ? 'Repetir mês anterior'
+          : 'Nova lista',
+    );
     if (name == null || !mounted) return;
+    List<ShoppingItem>? bulk;
+    if (mode == ListCreation.bulk) {
+      bulk = await askBulkProducts(context);
+      if (bulk == null || !mounted) return;
+    }
+    setState(() => _creating = true);
     try {
-      final id = await widget.model.repository.createList(name);
+      final String? id;
+      if (mode == ListCreation.previousMonth) {
+        id = await widget.model.repository.createListFromPreviousMonth(name);
+      } else {
+        id = await widget.model.repository.createList(
+          name,
+          items: bulk ?? const [],
+        );
+      }
+      if (id == null) {
+        if (mounted) {
+          showMessage(
+            context,
+            'Nenhuma compra em ${DateFormat('MMMM yyyy', 'pt_BR').format(previous)}. Salve uma nota no histórico para usar esta opção.',
+          );
+        }
+        return;
+      }
       await widget.model.load();
       if (mounted) {
+        setState(() => _completed = false);
         await Navigator.push(
           context,
           MaterialPageRoute<void>(
-            builder: (_) => ListScreen(model: widget.model, listId: id),
+            builder: (_) => ListScreen(model: widget.model, listId: id!),
           ),
         );
       }
@@ -45,6 +82,8 @@ class _HomeScreenState extends State<HomeScreen> {
           'Não foi possível criar a lista. Tente novamente.',
         );
       }
+    } finally {
+      if (mounted) setState(() => _creating = false);
     }
   }
 
@@ -132,18 +171,71 @@ class _HomeScreenState extends State<HomeScreen> {
               const Icon(
                 Icons.phonelink_lock_outlined,
                 size: 20,
-                color: Color(0xFF63836D),
+                color: AppColors.primary,
               ),
             ],
           ),
-          const SectionHeader(
-            'Minhas listas',
-            subtitle: 'Sua próxima compra começa aqui.',
-          ),
-          FilledButton.icon(
-            onPressed: _newList,
-            icon: const Icon(Icons.add),
-            label: const Text('Nova lista'),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.primary, Color(0xFF8B62D9)],
+              ),
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Row(
+                  children: [
+                    Icon(
+                      Icons.auto_awesome_rounded,
+                      color: Color(0xFFFFCBB9),
+                      size: 20,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'BORA ORGANIZAR?',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Menos correria.\nMais organização.',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    height: 1.12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -.7,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Sua lista do seu jeito. Um item, vários de uma vez ou a compra do mês passado.',
+                  style: TextStyle(color: Color(0xFFF0E9FF), height: 1.4),
+                ),
+                const SizedBox(height: 22),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFD3BD),
+                    foregroundColor: AppColors.ink,
+                  ),
+                  onPressed: _creating ? null : _newList,
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(_creating ? 'Criando…' : 'Nova lista'),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
@@ -154,7 +246,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.qr_code_scanner),
             label: const Text('Escanear ou fotografar nota'),
           ),
-          const SizedBox(height: 22),
+          const SectionHeader(
+            'Minhas listas',
+            subtitle: 'Tudo que falta para a próxima compra.',
+          ),
           TextField(
             decoration: const InputDecoration(
               hintText: 'Buscar uma lista',
@@ -187,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? 'Experimente outro nome.'
                   : _completed
                   ? 'As listas finalizadas ficam aqui para você consultar e duplicar.'
-                  : 'Adicione os produtos e acompanhe o valor estimado antes de chegar ao caixa.',
+                  : 'Crie uma lista, adicione produtos e vá marcando o que já está no carrinho.',
             ),
           for (var index = 0; index < lists.length; index++)
             Padding(
@@ -213,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Cada cartão resume progresso e estimativa sem modificar a lista.
+  /// Cada cartão resume o progresso; valores pertencem ao histórico de compras.
   Widget _listCard(ShoppingList list, int index) => Card(
     child: InkWell(
       borderRadius: BorderRadius.circular(20),
@@ -228,8 +323,12 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: const Color(0xFFE7F2EA),
-              foregroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: index.isEven
+                  ? AppColors.lavender
+                  : const Color(0xFFFFE7DD),
+              foregroundColor: index.isEven
+                  ? AppColors.primary
+                  : const Color(0xFFAC4933),
               child: Icon(
                 list.completed ? Icons.task_alt : Icons.shopping_bag_outlined,
               ),
@@ -245,7 +344,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${list.checkedCount} de ${list.items.length} itens • ${money(list.totalCents)}',
+                    '${list.checkedCount} de ${list.items.length} itens no carrinho',
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                   ),
                   const SizedBox(height: 12),
@@ -256,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? 0
                           : list.checkedCount / list.items.length,
                       minHeight: 6,
-                      backgroundColor: const Color(0xFFE9EEEA),
+                      backgroundColor: AppColors.lavender,
                     ),
                   ),
                 ],

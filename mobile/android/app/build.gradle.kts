@@ -4,6 +4,10 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// A cópia de teste instala ao lado da versão atual quando a chave antiga não está disponível.
+val sideBySideTest = providers.gradleProperty("carrinhoTestBuild")
+    .orElse(providers.environmentVariable("CARRINHO_SIDE_BY_SIDE_TEST")).orNull == "true"
+
 android {
     namespace = "br.com.carrinhodecompras.carrinho_de_compras"
     compileSdk = flutter.compileSdkVersion
@@ -17,6 +21,8 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "br.com.carrinhodecompras.carrinho_de_compras"
+        if (sideBySideTest) applicationIdSuffix = ".teste"
+        manifestPlaceholders["appName"] = if (sideBySideTest) "Carrinho Teste" else "Carrinho de Compras"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // Android 7.0 ou superior, compatível com o Flutter e os leitores locais.

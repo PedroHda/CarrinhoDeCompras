@@ -1,20 +1,23 @@
 # Relatório técnico — Carrinho de Compras
 
-Entrega desenvolvida em 18/10/2026 para Android, com Flutter/Dart, SQLite no próprio celular e backend opcional ASP.NET Core 10. A interface usa português brasileiro e o visual claro com verde apresentado na proposta.
+Entrega atualizada em 19/10/2026 para Android, com Flutter/Dart, SQLite no próprio celular e backend opcional ASP.NET Core 10. A versão 1.1.0 usa português brasileiro e uma identidade visual em roxo e coral.
 
 ## 1. O que foi implementado
 
 | Recurso | Funcionamento |
 |---|---|
 | Listas | Criar, pesquisar, renomear, duplicar, excluir e consultar concluídas. |
-| Produtos | Nome, quantidade fracionada, unidade, preço, total estimado e marcação de comprado. |
+| Produtos | Nome, quantidade fracionada, unidade e marcação no carrinho, sem preços no planejamento. |
+| Entrada em lote | Um produto por linha, com quantidade opcional (`2x Leite`, `1,5 kg Banana`) e prévia antes de adicionar. |
+| Mês anterior | Nova lista baseada nas compras do mês calendário anterior, somando quantidades de nomes/unidades iguais, com preços zerados e itens desmarcados. |
+| Manipulação | Toque para editar, botões +/−, separação entre pendentes e carrinho e exclusão por deslize com desfazer na posição original. |
 | Finalização manual | Somente itens marcados passam à conferência de uma compra. |
 | Consulta fiscal | Leitura de QR code e importação de NFC-e nos portais oficiais HTTPS de SP. |
 | Foto da nota | Captura pela câmera ou escolha da galeria, com OCR latino local. |
 | Conferência | Corrigir estabelecimento, data, produtos, quantidade, unidade, preço e total de cada linha. |
 | Associação | Uma nota pode concluir uma lista existente ou ficar somente no histórico. |
 | Duplicidade | A chave fiscal única impede importar novamente a mesma NFC-e. |
-| Histórico | Pesquisa por mercado ou descrição de produto, filtro mensal e detalhes de cada compra. |
+| Histórico | Pesquisa por mercado/produto, filtros dia, semana, mês, ano e todo período, seleção de data e navegação por setas. |
 | Backup | Exportação JSON pelo compartilhamento Android e restauração transacional. |
 | Backend | Consulta HTTP sem banco de usuários, com limites e proteção de destinos. |
 | Distribuição | APK release de teste, assinado com chave de desenvolvimento. |
@@ -79,11 +82,11 @@ O arquivo `carrinho_v1.db` fica no diretório privado de bancos do Android. O ap
 
 `PRAGMA foreign_keys = ON` é aplicado a cada conexão. Excluir uma lista remove seus itens, mas as compras ligadas a ela continuam no histórico com vínculo nulo. Excluir uma compra remove suas linhas. O esquema começa na versão 1; mudanças futuras devem adicionar migrações em `onUpgrade`, sem apagar bancos existentes.
 
-Não há tabela global de produtos: a descrição da lista e a descrição fiscal são preservadas em seus próprios registros. Assim, nomes semelhantes não são fundidos incorretamente. Um catálogo com associação por GTIN/descrição pode ser acrescentado depois, mantendo os preços históricos.
+Não há tabela global de produtos: a descrição da lista e a descrição fiscal são preservadas em seus próprios registros. Somente na geração do mês anterior os nomes são agrupados, ignorando maiúsculas e espaços repetidos; unidades diferentes permanecem separadas. Não se tenta adivinhar equivalências entre marcas ou descrições distintas.
 
 ### Dinheiro, peso e arredondamento
 
-Os cálculos financeiros usam **inteiros**. `R$ 4,79` é `479`; `1,096 kg` é `1096` milésimos de kg. O total planejado usa `(precoCentavos * quantidadeMilesimos + 500) ~/ 1000`, com arredondamento comercial para centavos. `double` aparece somente na formatação visual, nunca como armazenamento de dinheiro.
+Os cálculos financeiros usam **inteiros**. `R$ 4,79` é `479`; `1,096 kg` é `1096` milésimos de kg. A conferência fiscal usa `(precoCentavos * quantidadeMilesimos + 500) ~/ 1000`, com arredondamento comercial para centavos. `double` aparece somente na formatação visual, nunca como armazenamento de dinheiro. O planejamento não exibe nem solicita preços; as colunas antigas permanecem para compatibilidade dos backups, sem migração destrutiva.
 
 O parser de entrada separa parte inteira e fracionária, aceita vírgula brasileira e arredonda a casa excedente. Entradas negativas, inválidas ou excessivas são rejeitadas. A precisão de quantidade nesta versão é de três casas; preços por unidade são armazenados em centavos. Na importação, o **total original da linha fiscal** é preservado separadamente para não recomputar incorretamente promoções ou arredondamentos.
 
@@ -165,13 +168,15 @@ A pasta original contém caracteres acentuados. O Gradle recusou esse caminho no
 .\scripts\build-apk.ps1
 ```
 
-O Flutter foi instalado em `$env:USERPROFILE\.codex\toolchains\flutter`. O SDK Android existente era somente leitura e foi copiado para `$env:USERPROFILE\.codex\toolchains\android-sdk`, onde o NDK necessário foi instalado. Nenhum diretório original de ferramentas foi apagado. O staging fica em `$env:USERPROFILE\.codex\builds\carrinho-mobile`.
+O script detecta ferramentas por parâmetros, ambiente e caminhos comuns; também aceita o Flutter local em `.tools/flutter`. A cópia de compilação é nova a cada execução, em `mobile/build/apk-stage-*` ou no temporário se houver acentos no caminho. `-PreflightOnly` valida o ambiente sem compilar e `-PrepareOnly` resolve as dependências. Nenhum diretório original de ferramentas é apagado.
 
-O APK usa `applicationId` `br.com.carrinhodecompras.carrinho_de_compras`, versão `1.0.0+1`, código nativo release e assinatura de desenvolvimento. Isso atende à instalação direta para teste. Antes da publicação em loja, configure e proteja uma chave de produção, revise a política de backup/privacidade e valide os requisitos da loja. A chave de assinatura não integra o repositório.
+O APK usa `applicationId` `br.com.carrinhodecompras.carrinho_de_compras`, versão `1.1.0+2`, código nativo release e assinatura de desenvolvimento. A chave de assinatura não integra o repositório. A compatibilidade da assinatura com a versão anterior e os resultados da compilação atual estão em `artifacts/VALIDACAO.md`.
+
+Também é gerado um APK separado com o sufixo de pacote `.teste` e nome **Carrinho Teste**, ativado pela propriedade Gradle `carrinhoTestBuild=true` (`-SideBySideTest` no script). Ele mantém o app anterior instalado e seu banco intacto; dados são transferidos pelo backup JSON já existente no aplicativo. Essa opção permite testar sem depender da chave de assinatura da versão anterior.
 
 O otimizador R8 é mantido. `proguard-rules.pro` contém apenas as oito supressões específicas sugeridas pelo próprio R8 para modelos OCR opcionais de chinês, devanágari, japonês e coreano. O app instancia somente o reconhecedor latino. Caso outros alfabetos sejam acrescentados, suas bibliotecas nativas também deverão ser incluídas.
 
-Para instalar, transfira `artifacts/carrinho-de-compras-1.0.0.apk` ao Android e abra-o. O sistema pode solicitar permissão para instalar pela origem escolhida. Não é necessário instalar Flutter, Expo ou .NET no celular.
+Para instalar, transfira `artifacts/carrinho-de-compras-1.1.0.apk` ao Android e abra-o. O sistema pode solicitar permissão para instalar pela origem escolhida. Não é necessário instalar Flutter, Expo ou .NET no celular.
 
 ## 8. Verificação e limites dos testes
 
@@ -185,7 +190,7 @@ Nenhum Android físico estava conectado por ADB no ambiente de desenvolvimento. 
 
 O arquivo `artifacts/VALIDACAO.md` registra o resultado final dos comandos e a identificação do binário entregue.
 
-Resultado final: **18 testes Flutter e 13 testes .NET aprovados**, análise estática sem problemas e APK release de **105.518.040 bytes**. A assinatura v2 foi validada pelo `apksigner`; o manifesto compilado confirma Android mínimo 24 e alvo 36. O anexo linha a linha contém **60 arquivos e 5778 linhas**, com hashes conferidos contra o código-fonte.
+A validação da versão inicial teve 18 testes Flutter e 13 testes .NET aprovados. Para a versão 1.1.0, foram acrescentadas regressões de lotes, desfazer exclusão, limites do calendário, mês anterior e fluxos de interface. Os resultados atuais e os dados do APK são registrados em `artifacts/VALIDACAO.md`; o inventário e o anexo linha a linha acompanham as fontes desta versão.
 
 Capturas renderizadas das telas: [Minhas listas](screenshots/listas.png) e [Lista aberta](screenshots/lista-aberta.png). São dados sintéticos de QA, não registros pessoais do usuário.
 

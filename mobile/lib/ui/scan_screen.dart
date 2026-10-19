@@ -199,7 +199,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
                     }
                   },
                   errorBuilder: (context, error) => const ColoredBox(
-                    color: Color(0xFF263A2F),
+                    color: Color(0xFF282342),
                     child: Center(
                       child: Padding(
                         padding: EdgeInsets.all(24),
@@ -218,7 +218,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
                     height: 180,
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: const Color(0xFF70E3A2),
+                        color: const Color(0xFFFFBCA6),
                         width: 3,
                       ),
                       borderRadius: BorderRadius.circular(20),
@@ -292,7 +292,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
           ),
         const SizedBox(height: 8),
         const NoteBox(
-          'Os dados ficam no celular. A foto é processada localmente e os itens passam por conferência antes de salvar.',
+          'Depois da conferência, a nota vai para o histórico com produtos, quantidades e preços. A foto é processada no celular.',
           icon: Icons.phonelink_lock_outlined,
         ),
       ],

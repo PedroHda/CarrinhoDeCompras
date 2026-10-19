@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
 
-/// Tema único inspirado na proposta visual: verde, superfícies claras e leitura fácil.
+/// Cores compartilhadas para listas, histórico e formulários.
+abstract final class AppColors {
+  static const primary = Color(0xFF6355D9);
+  static const coral = Color(0xFFF47762);
+  static const background = Color(0xFFF7F5FF);
+  static const lavender = Color(0xFFECE8FF);
+  static const ink = Color(0xFF282342);
+  static const muted = Color(0xFF756F88);
+  static const border = Color(0xFFE7E1F2);
+  static const mint = Color(0xFFDDF4EB);
+  static const green = Color(0xFF26735A);
+}
+
 ThemeData buildTheme() {
   final scheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF147D50),
+    seedColor: AppColors.primary,
     brightness: Brightness.light,
   );
   return ThemeData(
     // Fonte empacotada localmente para manter a mesma aparência sem rede.
     fontFamily: 'AppRoboto',
     useMaterial3: true,
-    colorScheme: scheme.copyWith(primary: const Color(0xFF147D50)),
-    scaffoldBackgroundColor: const Color(0xFFF7F9F7),
+    colorScheme: scheme.copyWith(
+      primary: AppColors.primary,
+      secondary: AppColors.coral,
+      onSurface: AppColors.ink,
+      surface: AppColors.background,
+    ),
+    scaffoldBackgroundColor: AppColors.background,
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFFF7F9F7),
+      backgroundColor: AppColors.background,
       surfaceTintColor: Colors.transparent,
       centerTitle: false,
     ),
@@ -23,11 +40,15 @@ ThemeData buildTheme() {
       fillColor: Colors.white,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE1E8E2)),
+        borderSide: const BorderSide(color: AppColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE1E8E2)),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: AppColors.primary, width: 2),
       ),
     ),
     cardTheme: CardThemeData(
@@ -36,8 +57,28 @@ ThemeData buildTheme() {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFE6ECE7)),
+        side: const BorderSide(color: AppColors.border),
       ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(48, 52),
+        side: const BorderSide(color: AppColors.border),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        textStyle: const TextStyle(
+          fontFamily: 'AppRoboto',
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    ),
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: AppColors.ink,
+      actionTextColor: Color(0xFFFFC0AD),
+      behavior: SnackBarBehavior.floating,
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: AppColors.coral,
+      linearTrackColor: AppColors.lavender,
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -52,7 +93,7 @@ ThemeData buildTheme() {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: Colors.white,
-      indicatorColor: const Color(0xFFE0F0E7),
+      indicatorColor: AppColors.lavender,
       labelTextStyle: WidgetStateProperty.all(
         const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
       ),
@@ -62,7 +103,7 @@ ThemeData buildTheme() {
         fontSize: 30,
         fontWeight: FontWeight.w800,
         letterSpacing: -1.1,
-        color: Color(0xFF17261E),
+        color: AppColors.ink,
       ),
       headlineSmall: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -.5),
       titleMedium: TextStyle(fontWeight: FontWeight.w700),
