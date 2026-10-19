@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108" role="img" aria-label="Carrinho de Compras">
+  <rect width="108" height="108" rx="26" fill="#6355D9"/>
+  <path d="M27 32h8l8 32h31l8-23H38" fill="none" stroke="#FFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="46" cy="74" r="4" fill="#FFF"/>
+  <circle cx="72" cy="74" r="4" fill="#FFF"/>
+</svg>
